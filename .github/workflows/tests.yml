@@ -30,17 +30,20 @@ jobs:
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4.6.2
       with:
+        name: lxc-ui-api-linux-amd64
         path: |
           ./lxc-ui-api-linux-amd64
           
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4.6.2
       with:
+        name: lxc-ui-api-linux-arm64
         path: |
           ./lxc-ui-api-linux-arm64
           
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4.6.2
       with:
+        name: lxc-ui-api-android-arm64
         path: |
           ./lxc-ui-api-android-arm64
