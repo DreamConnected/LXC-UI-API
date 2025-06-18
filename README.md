@@ -13,6 +13,10 @@ server:
 ```
 2. Extract the ui folder from LXD-UI or INCUS-UI to the program directory.\
    You can also obtain it from https://github.com/cmspam/incus-ui.
+   Or use LXC_UI:
+```
+LXC_UI=/opt/incus/ui ./lxc-ui-api
+```
 3. Run it! You will see:
 ```
 ./lxc-ui-api

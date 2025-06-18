@@ -42,7 +42,7 @@ func main() {
 	address := fmt.Sprintf("%s:%d", config.Server.IP, config.Server.Port)
 	fmt.Printf("Start LXC-API service: %s\n", address)
 
-	if config.Server.ServerCert == "" || config.Server.ServerCertKey == "" {
+	if config.Server.ServerCert == "" && config.Server.ServerCertKey == "" {
 		cert, err = tools.GenerateSelfSignedCert()
 	} else {
 		cert, err = tools.LoadCert(config.Server.ServerCert, config.Server.ServerCertKey)
@@ -67,7 +67,12 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/1.0/events", lxcapi.HandleOperationsWebSocket)
 	mux.HandleFunc("/1.0/operations/", lxcapi.HandleOperationsWebSocketTerminal)
-	mux.HandleFunc("/ui/", tools.SpaHandler("./ui"))
+	lxc_ui_path, exists := os.LookupEnv("LXC_UI")
+	if exists {
+		mux.HandleFunc("/ui/", tools.SpaHandler(lxc_ui_path))
+	} else {
+		mux.HandleFunc("/ui/", tools.SpaHandler("./ui"))
+	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/ui/", http.StatusFound)
 	})
