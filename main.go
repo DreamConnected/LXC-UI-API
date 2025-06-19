@@ -16,6 +16,14 @@ import (
 // Config
 var config Config
 
+type Cert struct {
+	Cert string `yaml:"cert"`
+}
+
+type Token struct {
+	Token string `yaml:"token"`
+}
+
 type Config struct {
 	Server struct {
 		IP            string `yaml:"ip"`
@@ -24,6 +32,10 @@ type Config struct {
 		ServerCert    string `yaml:"server-cert"`
 		ServerCertKey string `yaml:"server-cert-key"`
 	} `yaml:"server"`
+	Client struct {
+		Certs  []Cert  `yaml:"certs"`
+		Tokens []Token `yaml:"tokens"`
+	} `yaml:"client"`
 }
 
 func main() {
@@ -38,30 +50,31 @@ func main() {
 	if err := decoder.Decode(&config); err != nil {
 		log.Fatalf("Bad config file: %v\n", err)
 	}
+	configFile.Close()
 
 	address := fmt.Sprintf("%s:%d", config.Server.IP, config.Server.Port)
 	fmt.Printf("Start LXC-API service: %s\n", address)
 
 	if config.Server.ServerCert == "" && config.Server.ServerCertKey == "" {
-		cert, err = tools.GenerateSelfSignedCert()
+		cert, _ = tools.GenerateSelfSignedCert()
 	} else {
-		cert, err = tools.LoadCert(config.Server.ServerCert, config.Server.ServerCertKey)
+		cert, _ = tools.LoadCert(config.Server.ServerCert, config.Server.ServerCertKey)
 	}
 
-	caCert, err := os.ReadFile(config.Server.Cert)
-	if err != nil {
-		log.Fatalf("Unable to read client CA certificate: %v\n", err)
-	}
 	clientCAs := x509.NewCertPool()
-	clientCAs.AppendCertsFromPEM(caCert)
-
+	for _, clientCert := range config.Client.Certs {
+		caCert, err := os.ReadFile(clientCert.Cert)
+		if err != nil {
+			log.Fatalf("Unable to read client CA certificate: %v\n", err)
+		}
+		clientCAs.AppendCertsFromPEM(caCert)
+	}
 	// TLS Config
 	tlsConfig := &tls.Config{
-		Certificates:       []tls.Certificate{cert},
-		MinVersion:         tls.VersionTLS13,
-		ClientCAs:          clientCAs,
-		ClientAuth:         tls.VerifyClientCertIfGiven,
-		InsecureSkipVerify: true,
+		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS13,
+		ClientCAs:    clientCAs,
+		ClientAuth:   tls.VerifyClientCertIfGiven,
 	}
 
 	mux := http.NewServeMux()

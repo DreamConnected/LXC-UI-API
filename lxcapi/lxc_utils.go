@@ -4,11 +4,14 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"net"
+	"os"
 	"strings"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"gopkg.in/yaml.v3"
 )
 
 func charCases(char string) string {
@@ -31,4 +34,19 @@ func generateFds(length int) (string, error) {
 	}
 
 	return hex.EncodeToString(randomBytes), nil
+}
+
+func ReadClientConfig(confFile string) *Config {
+	configFile, err := os.Open(confFile)
+	if err != nil {
+		log.Fatalf("Unable to open config file: %v\n", err)
+	}
+	defer configFile.Close()
+
+	decoder := yaml.NewDecoder(configFile)
+	if err := decoder.Decode(&config); err != nil {
+		log.Fatalf("Bad config file: %v\n", err)
+	}
+	configFile.Close()
+	return &config
 }

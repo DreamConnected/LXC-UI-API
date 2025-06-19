@@ -12,7 +12,7 @@ func ProjectDefaultHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Println("Request Method:", r.Method, "|", "Request API:", r.URL.Path)
 
-	if len(r.TLS.PeerCertificates) > 0 {
+	if IsTrusted(r) {
 		response := map[string]any{
 			"type":        "sync",
 			"status":      "Success",

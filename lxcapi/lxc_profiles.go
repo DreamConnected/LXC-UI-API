@@ -13,7 +13,7 @@ func ProfilesHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Request Method:", r.Method, "|", "Request API:", r.URL.Path)
 	//recursion := r.URL.Query().Get("recursion")
 
-	if len(r.TLS.PeerCertificates) > 0 {
+	if IsTrusted(r) {
 		response := map[string]any{
 			"type":        "sync",
 			"status":      "Success",

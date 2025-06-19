@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // SyncHandler handles the synchronization request. It processes the HTTP request
@@ -13,15 +14,20 @@ func SyncHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Request Method:", r.Method, "|", "Request API:", r.URL.Path)
 
 	var authStatus string
-	if len(r.TLS.PeerCertificates) > 0 {
+	if IsTrusted(r) {
 		authStatus = "trusted"
 	} else {
 		authStatus = "untrusted"
 	}
 
 	if authStatus == "trusted" {
-		clientCert := r.TLS.PeerCertificates[0]
-		clientCN := clientCert.Subject.Organization
+		var clientCN []string
+		if !IsTrustedToken {
+			clientCert := r.TLS.PeerCertificates[0]
+			clientCN = clientCert.Subject.Organization
+		} else {
+			clientCN = strings.Split(ClientToken, "")
+		}
 		response := map[string]any{
 			"type":        "sync",
 			"status":      "Success",

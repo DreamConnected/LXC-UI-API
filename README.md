@@ -7,9 +7,16 @@ LXC-UI-API is a backend API that allows lxc to be used on LXD-UI and INCUS-UI.
 server:
   ip: "0.0.0.0"
   port: 8443
-  cert: "incus-ui.crt"          # Client certificate
   server-cert: "server.crt"     # If empty, automatically generated will be used
   server-cert-key: "server.key" # If empty, automatically generated will be used
+
+client:
+  certs:                        # If empty, token only
+    - cert: "incus-ui.crt"
+    - cert: "lxd-ui.crt"
+  tokens:                       # If empty, tls only
+    - token: "qwerty"
+    - token: 000000
 ```
 2. Extract the ui folder from LXD-UI or INCUS-UI to the program directory.\
    You can also obtain it from https://github.com/cmspam/incus-ui.

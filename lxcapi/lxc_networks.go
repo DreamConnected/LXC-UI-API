@@ -84,7 +84,7 @@ func NetworksHandler(w http.ResponseWriter, r *http.Request) {
 		networkAction = parts[4]
 	}
 
-	if len(r.TLS.PeerCertificates) > 0 {
+	if IsTrusted(r) {
 		if networkName == "" && networkAction == "" {
 			networkData, err = getNetworkInterfaces()
 		} else if networkName != "" && networkAction == "forwards" {

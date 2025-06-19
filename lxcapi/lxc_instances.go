@@ -121,7 +121,7 @@ func InstancesHandler(w http.ResponseWriter, r *http.Request) {
 	//recursion := r.URL.Query().Get("recursion")
 	//project := r.URL.Query().Get("project")
 
-	if len(r.TLS.PeerCertificates) > 0 {
+	if IsTrusted(r) {
 		// 获取实例元数据
 		if instanceName == "" && instanceAction == "" {
 			instanceData, err = getInstanceInfo(instanceName)

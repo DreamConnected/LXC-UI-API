@@ -16,7 +16,7 @@ func OperationsHandler(w http.ResponseWriter, r *http.Request) {
 	//recursion := r.URL.Query().Get("recursion")
 	//allProjects := r.URL.Query().Get("all-projects")
 
-	if len(r.TLS.PeerCertificates) > 0 {
+	if IsTrusted(r) {
 
 		// if all-projects is "true", List all.  // Not im
 		operationsList, err := ListOperations()
