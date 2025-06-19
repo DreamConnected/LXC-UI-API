@@ -1,13 +1,10 @@
 package lxcapi
 
 import (
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
-
-var certPool *x509.CertPool
 
 // SyncHandler handles the synchronization request. It processes the HTTP request
 // and sends the appropriate response back to the client.

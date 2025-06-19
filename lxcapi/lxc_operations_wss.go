@@ -3,6 +3,7 @@ package lxcapi
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os/exec"
@@ -14,7 +15,6 @@ import (
 )
 
 var globalConn *websocket.Conn
-var globalConnTerminal *websocket.Conn
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -126,6 +126,10 @@ func HandleOperationsWebSocketTerminal(w http.ResponseWriter, r *http.Request) {
 	} else if len(parts) >= 4 {
 		operationID = parts[3]
 	}
+	_, err := GetOperation(operationID)
+	if err != nil {
+		return
+	}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Error upgrading connection:", err)
@@ -135,7 +139,6 @@ func HandleOperationsWebSocketTerminal(w http.ResponseWriter, r *http.Request) {
 
 	fds, _ := GetFds(operationID)
 	operation, _ := GetOperation(operationID)
-	globalConnTerminal = conn
 
 	if fds.Data == secret && !operation.IsConsole {
 		log.Println("WebSocket Terminal Data connection established")
@@ -161,11 +164,12 @@ func HandleOperationsWebSocketTerminal(w http.ResponseWriter, r *http.Request) {
 			buf := make([]byte, 1024)
 			for {
 				n, err := ptmx.Read(buf)
-				if err != nil {
+				if err != nil && err != io.EOF {
 					if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 						UpdateOperation(operationID, "Seccess", err.Error())
 						return
 					}
+					UpdateOperation(operationID, "Failure", err.Error())
 					return
 				}
 				if n > 0 {

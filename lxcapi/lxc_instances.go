@@ -457,7 +457,6 @@ func parseLxcInfo(outDetail string) State {
 					Counters:  make(map[string]int64),
 					Addresses: addresses,
 				}
-				currentIps = []string{}
 			}
 			currentLink = fields[1]
 			currentIps = []string{}

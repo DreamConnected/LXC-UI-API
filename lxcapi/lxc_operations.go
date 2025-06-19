@@ -36,6 +36,7 @@ func OperationsHandler(w http.ResponseWriter, r *http.Request) {
 
 		successMetadata := []map[string]any{}
 		runningMetadata := []map[string]any{}
+		failureMetadata := []map[string]any{}
 
 		for _, operation := range operationsList {
 			operationData := map[string]any{
@@ -55,11 +56,13 @@ func OperationsHandler(w http.ResponseWriter, r *http.Request) {
 				},
 			}
 
-			// May be have
-			if operation.Status == "Success" {
+			switch operation.Status {
+			case "Success":
 				successMetadata = append(successMetadata, operationData)
-			} else if operation.Status == "Running" {
+			case "Running":
 				runningMetadata = append(runningMetadata, operationData)
+			case "Failure":
+				failureMetadata = append(failureMetadata, operationData)
 			}
 		}
 
@@ -73,6 +76,7 @@ func OperationsHandler(w http.ResponseWriter, r *http.Request) {
 			"metadata": map[string]any{
 				"success": successMetadata,
 				"running": runningMetadata,
+				"failure": failureMetadata,
 			},
 		}
 		json.NewEncoder(w).Encode(response)
