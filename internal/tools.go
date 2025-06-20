@@ -34,6 +34,9 @@ func SpaHandler(uiDir string) http.HandlerFunc {
 
 func GenerateSelfSignedCert() (tls.Certificate, error) {
 	configFile, err := os.Open("config.yaml")
+	if err != nil {
+		return tls.Certificate{}, fmt.Errorf("Unable to open config.yaml: %v", err)
+	}
 	defer configFile.Close()
 	priv, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	if err != nil {

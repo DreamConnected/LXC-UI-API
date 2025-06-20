@@ -73,6 +73,21 @@ func CertificatesHandler(w http.ResponseWriter, r *http.Request) {
 		config := ReadClientConfig("config.yaml")
 		for _, clientToken := range config.Client.Tokens {
 			if payload.Password == clientToken.Token {
+				session, expires := Base64Token2Json(payload.Password)
+				if session == "" {
+					break
+				}
+				_, err := r.Cookie("client_id")
+				if err != nil {
+					http.SetCookie(w, &http.Cookie{
+						Name:     "client_id",
+						Value:    session,
+						Expires:  expires,
+						Secure:   true,
+						HttpOnly: true,
+						SameSite: http.SameSiteLaxMode,
+					})
+				}
 				// Token is just a token and does not verify fingerprint,
 				// expires_at, and other information.
 				// Under normal circumstances, token should be converted to
